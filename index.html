@@ -130,6 +130,23 @@
             100% { transform: scale(1); opacity: 1; }
         }
         
+        .fake-reveal {
+            animation: fakeBounce 0.8s forwards ease-out;
+        }
+        @keyframes fakeBounce {
+            0% { transform: scale(0.1); opacity: 0; }
+            30% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .hide-number {
+            animation: hideNumber 0.3s forwards;
+        }
+        @keyframes hideNumber {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.1); opacity: 0; }
+        }
+        
         .overlay {
             position: fixed;
             top: 0;
@@ -497,38 +514,93 @@
                     setTimeout(() => {
                         flashScreen(0.8);
                         
+                        // Pick from available numbers (the actual final number)
+                        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+                        const finalNumber = availableNumbers[randomIndex];
+                        
+                        // Remove the number from available numbers
+                        availableNumbers.splice(randomIndex, 1);
+                        selectedNumbers.push(finalNumber);
+                        
                         setTimeout(() => {
-                            // Pick from available numbers
-                            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-                            const finalNumber = availableNumbers[randomIndex];
+                            // Randomly decide if we should show a fake number first (50% chance)
+                            const shouldShowFakeNumber = Math.random() < 0.5;
                             
-                            // Remove the number from available numbers
-                            availableNumbers.splice(randomIndex, 1);
-                            selectedNumbers.push(finalNumber);
-                            
-                            // Reveal the number!
-                            resultElement.className = "number-display reveal";
-                            resultElement.textContent = finalNumber;
-                            
-                            // Characters react with joy
-                            setTimeout(() => {
-                                makeCharactersHappy();
-                                createHearts();
+                            if (shouldShowFakeNumber) {
+                                // Generate a fake number that's NOT the final number
+                                let fakeNumber;
+                                do {
+                                    fakeNumber = Math.floor(Math.random() * maxNumber) + 1;
+                                } while (fakeNumber === finalNumber);
                                 
-                                // Random happy phrases with "Unlucky you" added
-                                const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
-                                const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
-                                showDramaticText(randomHappyPhrase, true);
+                                // Show fake number with slightly different animation
+                                resultElement.className = "number-display fake-reveal";
+                                resultElement.textContent = fakeNumber;
                                 
-                                // Re-enable button
-                                generateBtn.disabled = false;
+                                // Show a "wait" reaction from characters
+                                setTimeout(() => {
+                                    makeCharactersLookConfused();
+                                    showDramaticText("...");
+                                    
+                                    // Hide the fake number - SHORTER DELAY HERE (was 1200ms)
+                                    setTimeout(() => {
+                                        resultElement.className = "number-display hide-number";
+                                        
+                                        // Then show the real number - SHORTER DELAY HERE (was 500ms)
+                                        setTimeout(() => {
+                                            // Show the real number with bounce animation
+                                            resultElement.className = "number-display reveal";
+                                            resultElement.textContent = finalNumber;
+                                            flashScreen(0.5);
+                                            showDramaticText("Actually...");
+                                            
+                                            // Characters react with joy
+                                            setTimeout(() => {
+                                                makeCharactersHappy();
+                                                createHearts();
+                                                
+                                                // Happy phrases
+                                                const happyPhrases = ["Yay!", "For real this time!", "わーい!", "Perfect!", "♡", "Super cute!"];
+                                                const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                                                showDramaticText(randomHappyPhrase, true);
+                                                
+                                                // Re-enable button
+                                                generateBtn.disabled = false;
+                                                
+                                                // Show reset button if all numbers are used
+                                                if (availableNumbers.length === 0) {
+                                                    generateBtn.style.display = 'none';
+                                                    resetBtn.style.display = 'inline-block';
+                                                }
+                                            }, 500);
+                                        }, 300);
+                                    }, 700);
+                                }, 500);
+                            } else {
+                                // No fake number, just show the real one directly
+                                resultElement.className = "number-display reveal";
+                                resultElement.textContent = finalNumber;
                                 
-                                // Show reset button if all numbers are used
-                                if (availableNumbers.length === 0) {
-                                    generateBtn.style.display = 'none';
-                                    resetBtn.style.display = 'inline-block';
-                                }
-                            }, 500);
+                                // Characters react with joy
+                                setTimeout(() => {
+                                    makeCharactersHappy();
+                                    createHearts();
+                                    
+                                    // Random happy phrases with "Unlucky you" added
+                                    const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
+                                    const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                                    showDramaticText(randomHappyPhrase, true);
+                                    
+                                    // Re-enable button
+                                    generateBtn.disabled = false;
+                                    
+                                    // Show reset button if all numbers are used
+                                    if (availableNumbers.length === 0) {
+                                        generateBtn.style.display = 'none';
+                                        resetBtn.style.display = 'inline-block';
+                                    }
+                                }, 500);
+                            }
                         }, 300);
                     }, 1000);
                 }
@@ -607,6 +679,58 @@
             });
         }
         
+        function makeCharactersLookConfused() {
+            const eyes = document.querySelectorAll('.eye');
+            const mouths = document.querySelectorAll('.mouth');
+            const chars = document.querySelectorAll('.character');
+            
+            // Big round eyes with small mouth
+            eyes.forEach(eye => {
+                eye.style.height = '20%';
+                eye.style.width = '20%';
+                eye.style.borderRadius = '50%';
+            });
+            
+            mouths.forEach(mouth => {
+                mouth.style.borderBottom = 'none';
+                mouth.style.borderTop = '3px solid #ec407a';
+                mouth.style.borderRadius = '50%';
+                mouth.style.height = '5%';
+                mouth.style.width = '15%';
+                mouth.style.background = 'transparent';
+            });
+            
+            chars.forEach(char => {
+                char.style.animation = 'none';
+                char.style.transform = 'rotate(15deg)';
+            });
+            
+            // Add tilt animation
+            const keyframes = `
+                @keyframes tilt {
+                    0% { transform: rotate(10deg); }
+                    100% { transform: rotate(-10deg); }
+                }
+            `;
+            
+            const styleSheet = document.createElement('style');
+            styleSheet.type = 'text/css';
+            styleSheet.innerText = keyframes;
+            document.head.appendChild(styleSheet);
+            
+            // Apply tilt animation
+            setTimeout(() => {
+                chars.forEach(char => {
+                    char.style.animation = 'tilt 0.5s 2 alternate';
+                });
+                
+                // Cleanup
+                setTimeout(() => {
+                    styleSheet.remove();
+                }, 2000);
+            }, 200);
+        }
+        
         function increaseNervousness() {
             const chars = document.querySelectorAll('.character');
             const mouths = document.querySelectorAll('.mouth');
@@ -629,11 +753,13 @@
             
             eyes.forEach(eye => {
                 eye.style.height = '10%';
+                eye.style.width = '10%';
                 eye.style.borderRadius = '50% 50% 0 0';
             });
             
             mouths.forEach(mouth => {
                 mouth.style.borderBottom = 'none';
+                mouth.style.borderTop = 'none';
                 mouth.style.borderRadius = '50%';
                 mouth.style.height = '15%';
                 mouth.style.width = '20%';
@@ -646,6 +772,7 @@
             
             chars.forEach(char => {
                 char.style.animation = 'bounce 0.5s infinite alternate';
+                char.style.transform = 'rotate(0deg)';
             });
             
             // Add bounce animation dynamically
@@ -670,11 +797,13 @@
             
             eyes.forEach(eye => {
                 eye.style.height = '15%';
+                eye.style.width = '10%';
                 eye.style.borderRadius = '50%';
             });
             
             mouths.forEach(mouth => {
                 mouth.style.borderBottom = '3px solid #ec407a';
+                mouth.style.borderTop = 'none';
                 mouth.style.borderRadius = '50%';
                 mouth.style.height = '10%';
                 mouth.style.width = '20%';
@@ -687,6 +816,7 @@
             
             chars.forEach(char => {
                 char.style.animation = 'none';
+                char.style.transform = 'rotate(0deg)';
             });
         }
         
