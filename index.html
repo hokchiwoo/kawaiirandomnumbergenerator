@@ -303,6 +303,49 @@
             background-color: #29b6f6;
         }
         
+        /* Sound control button */
+        .sound-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-btn:hover {
+            transform: scale(1.1);
+            background-color: white;
+        }
+        
+        .sound-icon {
+            width: 20px;
+            height: 20px;
+            fill: #ec407a;
+        }
+        
+        .sound-btn .muted {
+            display: none;
+        }
+        
+        .sound-btn.muted .unmuted {
+            display: none;
+        }
+        
+        .sound-btn.muted .muted {
+            display: block;
+        }
+        
         /* Desktop specific adjustments */
         @media (min-width: 768px) {
             /* Move title to top to prevent overlap with number */
@@ -370,6 +413,13 @@
             .dramatic-text {
                 font-size: min(3rem, 10vw);
             }
+            
+            .sound-btn {
+                top: 10px;
+                right: 10px;
+                width: 35px;
+                height: 35px;
+            }
         }
     </style>
 </head>
@@ -383,6 +433,15 @@
         <button id="resetBtn" class="button reset-btn" onclick="resetGenerator()">Start Over!</button>
         <p class="range">✧₊˚ 1 to 32 ˚₊✧</p>
     </div>
+    
+    <button class="sound-btn" id="soundToggle" onclick="toggleSound()">
+        <svg class="sound-icon unmuted" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        <svg class="sound-icon muted" viewBox="0 0 24 24">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+    </button>
     
     <div class="character left" id="charLeft">
         <div class="face">
@@ -420,9 +479,138 @@
         let selectedNumbers = [];
         const maxNumber = 32;
         
+        // Audio context
+        let audioCtx;
+        let isSoundEnabled = true;
+        
         // Initialize number tracking
         function initializeGenerator() {
             resetNumberTracking();
+            
+            // Initialize audio context on first user interaction
+            document.addEventListener('click', initAudio, {once: true});
+        }
+        
+        function initAudio() {
+            // Create audio context
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        function toggleSound() {
+            const soundBtn = document.getElementById('soundToggle');
+            isSoundEnabled = !isSoundEnabled;
+            
+            if (isSoundEnabled) {
+                soundBtn.classList.remove('muted');
+            } else {
+                soundBtn.classList.add('muted');
+            }
+        }
+        
+        // Sound effects
+        function playKawaiiSound(type) {
+            if (!audioCtx || !isSoundEnabled) return;
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            switch(type) {
+                case 'button':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                    break;
+                    
+                case 'countdown':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.1);
+                    break;
+                    
+                case 'reveal':
+                    // Happy chord
+                    playChord([523.25, 659.25, 783.99], 0.4); // C5, E5, G5
+                    break;
+                    
+                case 'fake':
+                    // Confusion sound
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(466.16, audioCtx.currentTime); // Bb4
+                    oscillator.frequency.exponentialRampToValueAtTime(369.99, audioCtx.currentTime + 0.3); // F#4
+                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                    break;
+                    
+                case 'dramatic':
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    oscillator.frequency.exponentialRampToValueAtTime(233.08, audioCtx.currentTime + 0.3); // Bb3
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.2);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                    break;
+                    
+                case 'success':
+                    // Play a rising arpeggio
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    
+                    notes.forEach((note, i) => {
+                        setTimeout(() => {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+                            
+                            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                            
+                            osc.start();
+                            osc.stop(audioCtx.currentTime + 0.3);
+                        }, i * 100);
+                    });
+                    
+                    break;
+            }
+        }
+        
+        function playChord(frequencies, duration = 0.5) {
+            if (!audioCtx || !isSoundEnabled) return;
+            
+            frequencies.forEach(freq => {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + duration);
+            });
         }
         
         function resetNumberTracking() {
@@ -438,6 +626,9 @@
             const dramaticText = document.getElementById('dramaticText');
             const generateBtn = document.getElementById('generateBtn');
             const resetBtn = document.getElementById('resetBtn');
+            
+            // Play button sound
+            playKawaiiSound('button');
             
             // Check if we have numbers available
             if (availableNumbers.length === 0) {
@@ -474,7 +665,7 @@
                 "Oh my!",
                 "Here it comes!",
                 "Hold on tight!",
-                "Ahhhh!",
+                "Oh wow!",
                 "(⊙_⊙)",
                 "Kyaaaa!",
                 "So nervous!",
@@ -500,12 +691,16 @@
                 if (currentPhase < phases.length) {
                     const phase = phases[currentPhase];
                     
+                    // Play sound for this phase
+                    playKawaiiSound('countdown');
+                    
                     // Apply animation
                     resultElement.className = `number-display ${phase.animation}`;
                     
                     // Random flashing
                     if (Math.random() > 0.7) {
                         flashScreen();
+                        playKawaiiSound('dramatic');
                     }
                     
                     // Change numbers rapidly
@@ -540,6 +735,7 @@
                     // Big flash before reveal
                     setTimeout(() => {
                         flashScreen(0.8);
+                        playKawaiiSound('dramatic');
                         
                         // Pick from available numbers (the actual final number)
                         const randomIndex = Math.floor(Math.random() * availableNumbers.length);
@@ -563,6 +759,7 @@
                                 // Show fake number with slightly different animation
                                 resultElement.className = "number-display fake-reveal";
                                 resultElement.textContent = fakeNumber;
+                                playKawaiiSound('fake');
                                 
                                 // Show a "wait" reaction from characters
                                 setTimeout(() => {
@@ -579,12 +776,14 @@
                                             resultElement.className = "number-display reveal";
                                             resultElement.textContent = finalNumber;
                                             flashScreen(0.5);
+                                            playKawaiiSound('reveal');
                                             showDramaticText("Actually...");
                                             
                                             // Characters react with joy
                                             setTimeout(() => {
                                                 makeCharactersHappy();
                                                 createHearts();
+                                                playKawaiiSound('success');
                                                 
                                                 // Happy phrases
                                                 const happyPhrases = ["Yay!", "For real this time!", "わーい!", "Perfect!", "♡", "Super cute!"];
@@ -607,11 +806,13 @@
                                 // No fake number, just show the real one directly
                                 resultElement.className = "number-display reveal";
                                 resultElement.textContent = finalNumber;
+                                playKawaiiSound('reveal');
                                 
                                 // Characters react with joy
                                 setTimeout(() => {
                                     makeCharactersHappy();
                                     createHearts();
+                                    playKawaiiSound('success');
                                     
                                     // Random happy phrases with "Unlucky you" added
                                     const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
@@ -644,6 +845,9 @@
         function resetGenerator() {
             // Reset available numbers
             resetNumberTracking();
+            
+            // Play button sound
+            playKawaiiSound('button');
             
             // Reset the display
             document.getElementById('result').textContent = "?";
