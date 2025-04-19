@@ -31,20 +31,25 @@
             padding: 0;
             position: relative;
             z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
         }
         h1 {
             color: #ec407a;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            font-size: min(2.5rem, 8vw);
             text-shadow: 2px 2px 0px #ffcdd2;
         }
         .number-display {
-            font-size: 25vw; /* Reduced for desktop */
+            font-size: min(25rem, 25vw);
             font-weight: bold;
             color: #ec407a;
             line-height: 0.9;
             margin: 0;
-            height: 45vh; /* Reduced for desktop */
+            height: min(45vh, 300px);
             width: 100%;
             display: flex;
             align-items: center;
@@ -57,7 +62,7 @@
         .number-display::after {
             content: "★";
             position: absolute;
-            font-size: 8vw; /* Reduced for desktop */
+            font-size: min(8rem, 8vw);
             color: #f8bbd0;
             animation: float 3s infinite alternate ease-in-out;
         }
@@ -142,8 +147,8 @@
             background-color: #f48fb1;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.5rem;
+            padding: min(15px, 3vw) min(30px, 6vw);
+            font-size: min(1.5rem, 6vw);
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
@@ -169,7 +174,7 @@
         .range {
             margin-top: 10px;
             color: #ec407a;
-            font-size: 1.2rem;
+            font-size: min(1.2rem, 5vw);
         }
         .hearts {
             position: absolute;
@@ -182,8 +187,8 @@
         .character {
             position: absolute;
             bottom: 20px;
-            width: 100px;
-            height: 100px;
+            width: min(100px, 15vw);
+            height: min(100px, 15vw);
             background: #f8bbd0;
             border-radius: 50%;
             display: flex;
@@ -206,105 +211,67 @@
         }
         .eyes {
             display: flex;
-            width: 60px;
+            width: 60%;
             justify-content: space-between;
             margin-bottom: 5px;
         }
         .eye {
-            width: 10px;
-            height: 15px;
+            width: 10%;
+            height: 15%;
             background: #ec407a;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
         .mouth {
-            width: 20px;
-            height: 10px;
+            width: 20%;
+            height: 10%;
             border-bottom: 3px solid #ec407a;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
         .blush {
             position: absolute;
-            width: 15px;
-            height: 7px;
+            width: 15%;
+            height: 7%;
             background: rgba(236, 64, 122, 0.3);
             border-radius: 50%;
         }
         .blush.left {
-            left: 20px;
-            top: 50px;
+            left: 20%;
+            top: 50%;
         }
         .blush.right {
-            right: 20px;
-            top: 50px;
+            right: 20%;
+            top: 50%;
         }
         
         .sweat {
             position: absolute;
-            width: 5px;
-            height: 10px;
+            width: 5%;
+            height: 10%;
             background: rgba(255, 255, 255, 0.7);
             border-radius: 50%;
             opacity: 0;
             transition: opacity 0.3s;
         }
         .sweat.left {
-            left: 15px;
-            top: 30px;
+            left: 15%;
+            top: 30%;
         }
         .sweat.right {
-            right: 15px;
-            top: 30px;
+            right: 15%;
+            top: 30%;
         }
         
         .dramatic-text {
             position: absolute;
-            font-size: 4vw;  /* Reduced for desktop */
+            font-size: min(4rem, 8vw);
             font-weight: bold;
             color: white;
             text-shadow: 2px 2px 0 #ad1457, -2px -2px 0 #ad1457, 2px -2px 0 #ad1457, -2px 2px 0 #ad1457;
             opacity: 0;
             z-index: 10;
             transform: rotate(-5deg);
-        }
-        
-        /* Numbers Grid */
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
-            margin: 20px auto 0;
-            max-width: 800px;
-            padding: 0 20px;
-        }
-        .number-cell {
-            background-color: #ffecf1;
-            border-radius: 10px;
-            padding: 8px 0;
-            color: #ec407a;
-            font-weight: bold;
-            transition: all 0.3s;
-            border: 2px solid #f48fb1;
-        }
-        .selected {
-            background-color: #f48fb1;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .selected::after {
-            content: "✓";
-            position: absolute;
-            font-size: 10px;
-            right: 5px;
-            top: 2px;
-        }
-        .remaining {
-            margin-top: 10px;
-            color: #ec407a;
-            font-size: 1.2rem;
-            font-weight: bold;
         }
         
         /* Reset Button */
@@ -317,37 +284,47 @@
             background-color: #29b6f6;
         }
         
-        @media (max-width: 768px) {
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .container {
+                min-height: auto;
+                padding: 10px 0;
+            }
+            
             .number-display {
-                font-size: 40vw;
-                height: 40vh;
+                height: min(35vh, 200px);
+                font-size: min(15rem, 20vw);
             }
-            .dramatic-text {
-                font-size: 8vw;
+            
+            .character {
+                width: min(80px, 10vw);
+                height: min(80px, 10vw);
+                bottom: 10px;
             }
-            .numbers-grid {
-                grid-template-columns: repeat(4, 1fr);
+            
+            h1 {
+                font-size: min(2rem, 6vw);
+                margin-bottom: 5px;
+            }
+            
+            button {
+                margin-top: 10px;
+            }
+            
+            .range {
+                margin-top: 5px;
             }
         }
         
+        /* Extra small devices */
         @media (max-width: 480px) {
-            .number-display {
-                font-size: 60vw;
-                height: 40vh;
-            }
-            h1 {
-                font-size: 6vw;
-            }
-            .character {
-                width: 70px;
-                height: 70px;
-            }
-            .eyes {
-                width: 40px;
-            }
             .number-display::before,
             .number-display::after {
-                font-size: 12vw;
+                font-size: min(6rem, 12vw);
+            }
+            
+            .dramatic-text {
+                font-size: min(3rem, 10vw);
             }
         }
     </style>
@@ -361,8 +338,6 @@
         <button id="generateBtn" onclick="generateNumber()">Pick a Number!</button>
         <button id="resetBtn" class="button reset-btn" onclick="resetGenerator()">Start Over!</button>
         <p class="range">✧₊˚ 1 to 32 ˚₊✧</p>
-        <p class="remaining" id="remaining">32 numbers remaining</p>
-        <div class="numbers-grid" id="numbersGrid"></div>
     </div>
     
     <div class="character left" id="charLeft">
@@ -401,33 +376,14 @@
         let selectedNumbers = [];
         const maxNumber = 32;
         
-        // Initialize the grid and number tracking
+        // Initialize number tracking
         function initializeGenerator() {
-            // Create the grid of numbers
-            const numbersGrid = document.getElementById('numbersGrid');
-            numbersGrid.innerHTML = '';
-            
-            for (let i = 1; i <= maxNumber; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'number-cell';
-                cell.textContent = i;
-                cell.id = `number-${i}`;
-                numbersGrid.appendChild(cell);
-            }
-            
-            // Reset number tracking
             resetNumberTracking();
         }
         
         function resetNumberTracking() {
             availableNumbers = Array.from({length: maxNumber}, (_, i) => i + 1);
             selectedNumbers = [];
-            updateRemainingCounter();
-        }
-        
-        function updateRemainingCounter() {
-            document.getElementById('remaining').textContent = 
-                `${availableNumbers.length} numbers remaining`;
         }
         
         function generateNumber() {
@@ -550,13 +506,6 @@
                             availableNumbers.splice(randomIndex, 1);
                             selectedNumbers.push(finalNumber);
                             
-                            // Update the grid
-                            const cell = document.getElementById(`number-${finalNumber}`);
-                            cell.classList.add('selected');
-                            
-                            // Update remaining counter
-                            updateRemainingCounter();
-                            
                             // Reveal the number!
                             resultElement.className = "number-display reveal";
                             resultElement.textContent = finalNumber;
@@ -596,12 +545,6 @@
         function resetGenerator() {
             // Reset available numbers
             resetNumberTracking();
-            
-            // Reset the grid
-            const cells = document.querySelectorAll('.number-cell');
-            cells.forEach(cell => {
-                cell.classList.remove('selected');
-            });
             
             // Reset the display
             document.getElementById('result').textContent = "?";
@@ -647,12 +590,12 @@
             const chars = document.querySelectorAll('.character');
             
             eyes.forEach(eye => {
-                eye.style.height = '7px';
+                eye.style.height = '7%';
             });
             
             mouths.forEach(mouth => {
-                mouth.style.width = '10px';
-                mouth.style.height = '10px';
+                mouth.style.width = '10%';
+                mouth.style.height = '10%';
             });
             
             sweats.forEach(sweat => {
@@ -673,8 +616,8 @@
             });
             
             mouths.forEach(mouth => {
-                mouth.style.width = '8px';
-                mouth.style.height = '8px';
+                mouth.style.width = '8%';
+                mouth.style.height = '8%';
             });
         }
         
@@ -685,15 +628,15 @@
             const chars = document.querySelectorAll('.character');
             
             eyes.forEach(eye => {
-                eye.style.height = '10px';
+                eye.style.height = '10%';
                 eye.style.borderRadius = '50% 50% 0 0';
             });
             
             mouths.forEach(mouth => {
                 mouth.style.borderBottom = 'none';
                 mouth.style.borderRadius = '50%';
-                mouth.style.height = '15px';
-                mouth.style.width = '20px';
+                mouth.style.height = '15%';
+                mouth.style.width = '20%';
                 mouth.style.background = '#ec407a';
             });
             
@@ -726,15 +669,15 @@
             const chars = document.querySelectorAll('.character');
             
             eyes.forEach(eye => {
-                eye.style.height = '15px';
+                eye.style.height = '15%';
                 eye.style.borderRadius = '50%';
             });
             
             mouths.forEach(mouth => {
                 mouth.style.borderBottom = '3px solid #ec407a';
                 mouth.style.borderRadius = '50%';
-                mouth.style.height = '10px';
-                mouth.style.width = '20px';
+                mouth.style.height = '10%';
+                mouth.style.width = '20%';
                 mouth.style.background = 'transparent';
             });
             
