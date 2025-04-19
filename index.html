@@ -35,16 +35,16 @@
         h1 {
             color: #ec407a;
             margin-bottom: 10px;
-            font-size: 3vw;
+            font-size: 2.5rem;
             text-shadow: 2px 2px 0px #ffcdd2;
         }
         .number-display {
-            font-size: 80vw;
+            font-size: 25vw; /* Reduced for desktop */
             font-weight: bold;
             color: #ec407a;
             line-height: 0.9;
             margin: 0;
-            height: 70vh;
+            height: 45vh; /* Reduced for desktop */
             width: 100%;
             display: flex;
             align-items: center;
@@ -57,17 +57,17 @@
         .number-display::after {
             content: "★";
             position: absolute;
-            font-size: 15vw;
+            font-size: 8vw; /* Reduced for desktop */
             color: #f8bbd0;
             animation: float 3s infinite alternate ease-in-out;
         }
         .number-display::before {
-            left: 10vw;
+            left: 15vw;
             top: 10vh;
             animation-delay: 0.5s;
         }
         .number-display::after {
-            right: 10vw;
+            right: 15vw;
             bottom: 10vh;
         }
         @keyframes float {
@@ -260,7 +260,7 @@
         
         .dramatic-text {
             position: absolute;
-            font-size: 8vw;
+            font-size: 4vw;  /* Reduced for desktop */
             font-weight: bold;
             color: white;
             text-shadow: 2px 2px 0 #ad1457, -2px -2px 0 #ad1457, 2px -2px 0 #ad1457, -2px 2px 0 #ad1457;
@@ -269,13 +269,74 @@
             transform: rotate(-5deg);
         }
         
+        /* Numbers Grid */
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin: 20px auto 0;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        .number-cell {
+            background-color: #ffecf1;
+            border-radius: 10px;
+            padding: 8px 0;
+            color: #ec407a;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid #f48fb1;
+        }
+        .selected {
+            background-color: #f48fb1;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .selected::after {
+            content: "✓";
+            position: absolute;
+            font-size: 10px;
+            right: 5px;
+            top: 2px;
+        }
+        .remaining {
+            margin-top: 10px;
+            color: #ec407a;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        /* Reset Button */
+        .reset-btn {
+            background-color: #81d4fa;
+            box-shadow: 0 5px 0 #29b6f6;
+            display: none;
+        }
+        .reset-btn:hover {
+            background-color: #29b6f6;
+        }
+        
+        @media (max-width: 768px) {
+            .number-display {
+                font-size: 40vw;
+                height: 40vh;
+            }
+            .dramatic-text {
+                font-size: 8vw;
+            }
+            .numbers-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
         @media (max-width: 480px) {
             .number-display {
-                font-size: 80vw;
-                height: 60vh;
+                font-size: 60vw;
+                height: 40vh;
             }
             h1 {
-                font-size: 7vw;
+                font-size: 6vw;
             }
             .character {
                 width: 70px;
@@ -283,6 +344,10 @@
             }
             .eyes {
                 width: 40px;
+            }
+            .number-display::before,
+            .number-display::after {
+                font-size: 12vw;
             }
         }
     </style>
@@ -293,8 +358,11 @@
     <div class="container">
         <h1>Kawaii Number Generator</h1>
         <div class="number-display" id="result">?</div>
-        <button onclick="generateNumber()">Pick a Number!</button>
+        <button id="generateBtn" onclick="generateNumber()">Pick a Number!</button>
+        <button id="resetBtn" class="button reset-btn" onclick="resetGenerator()">Start Over!</button>
         <p class="range">✧₊˚ 1 to 32 ˚₊✧</p>
+        <p class="remaining" id="remaining">32 numbers remaining</p>
+        <div class="numbers-grid" id="numbersGrid"></div>
     </div>
     
     <div class="character left" id="charLeft">
@@ -328,15 +396,59 @@
     <div class="dramatic-text" id="dramaticText"></div>
 
     <script>
+        // Track available numbers
+        let availableNumbers = [];
+        let selectedNumbers = [];
+        const maxNumber = 32;
+        
+        // Initialize the grid and number tracking
+        function initializeGenerator() {
+            // Create the grid of numbers
+            const numbersGrid = document.getElementById('numbersGrid');
+            numbersGrid.innerHTML = '';
+            
+            for (let i = 1; i <= maxNumber; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                cell.textContent = i;
+                cell.id = `number-${i}`;
+                numbersGrid.appendChild(cell);
+            }
+            
+            // Reset number tracking
+            resetNumberTracking();
+        }
+        
+        function resetNumberTracking() {
+            availableNumbers = Array.from({length: maxNumber}, (_, i) => i + 1);
+            selectedNumbers = [];
+            updateRemainingCounter();
+        }
+        
+        function updateRemainingCounter() {
+            document.getElementById('remaining').textContent = 
+                `${availableNumbers.length} numbers remaining`;
+        }
+        
         function generateNumber() {
             const resultElement = document.getElementById('result');
             const overlay = document.getElementById('overlay');
             const charLeft = document.getElementById('charLeft');
             const charRight = document.getElementById('charRight');
             const dramaticText = document.getElementById('dramaticText');
+            const generateBtn = document.getElementById('generateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Check if we have numbers available
+            if (availableNumbers.length === 0) {
+                resultElement.textContent = "All done!";
+                generateBtn.style.display = 'none';
+                resetBtn.style.display = 'inline-block';
+                return;
+            }
             
             // Disable button during animation
-            document.querySelector('button').disabled = true;
+            generateBtn.disabled = true;
             
             // Start with questioning
             resultElement.textContent = "?";
@@ -430,8 +542,22 @@
                         flashScreen(0.8);
                         
                         setTimeout(() => {
+                            // Pick from available numbers
+                            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+                            const finalNumber = availableNumbers[randomIndex];
+                            
+                            // Remove the number from available numbers
+                            availableNumbers.splice(randomIndex, 1);
+                            selectedNumbers.push(finalNumber);
+                            
+                            // Update the grid
+                            const cell = document.getElementById(`number-${finalNumber}`);
+                            cell.classList.add('selected');
+                            
+                            // Update remaining counter
+                            updateRemainingCounter();
+                            
                             // Reveal the number!
-                            const finalNumber = Math.floor(Math.random() * 32) + 1;
                             resultElement.className = "number-display reveal";
                             resultElement.textContent = finalNumber;
                             
@@ -441,12 +567,18 @@
                                 createHearts();
                                 
                                 // Random happy phrases with "Unlucky you" added
-                                const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡"];
+                                const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
                                 const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
                                 showDramaticText(randomHappyPhrase, true);
                                 
                                 // Re-enable button
-                                document.querySelector('button').disabled = false;
+                                generateBtn.disabled = false;
+                                
+                                // Show reset button if all numbers are used
+                                if (availableNumbers.length === 0) {
+                                    generateBtn.style.display = 'none';
+                                    resetBtn.style.display = 'inline-block';
+                                }
                             }, 500);
                         }, 300);
                     }, 1000);
@@ -459,6 +591,31 @@
             }, 150);
             
             setTimeout(runPhase, 500);
+        }
+        
+        function resetGenerator() {
+            // Reset available numbers
+            resetNumberTracking();
+            
+            // Reset the grid
+            const cells = document.querySelectorAll('.number-cell');
+            cells.forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Reset the display
+            document.getElementById('result').textContent = "?";
+            document.getElementById('result').className = "number-display";
+            
+            // Show generate button, hide reset button
+            document.getElementById('generateBtn').style.display = 'inline-block';
+            document.getElementById('resetBtn').style.display = 'none';
+            
+            // Reset characters
+            resetCharacters();
+            
+            // Show a happy message
+            showDramaticText("Let's go again! ✨", true);
         }
         
         function flashScreen(intensity = 0.3) {
@@ -651,6 +808,9 @@
                 }, 4000);
             }
         }
+        
+        // Initialize the generator when the page loads
+        document.addEventListener('DOMContentLoaded', initializeGenerator);
     </script>
 </body>
 </html>
