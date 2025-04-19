@@ -2,8 +2,6 @@
 
 A super cute and exciting random number generator with adorable animations and thrilling effects! Perfect for games, raffles, or anytime you need to randomly select unique numbers.
 
-![Kawaii Number Generator Screenshot](screenshot.jpg)
-
 ## Features
 
 - Generates unique random numbers from 1-32 (no repeats)
@@ -24,4 +22,23 @@ A super cute and exciting random number generator with adorable animations and t
 
 ## Use Cases
 
--
+- Classroom activities
+- Raffles and prize drawings
+- Board games that require random numbers
+- Team assignments
+- Bingo calling
+- Any situation where you need excitement around random selection!
+
+## Technical Details
+
+- Built with HTML, CSS, and JavaScript
+- No external dependencies
+- Fully responsive design works on mobile and desktop
+
+## License
+
+MIT License - Feel free to use and modify!
+
+## Credits
+
+Created by hokmanwu and Poe with lots of kawaii energy ✨
