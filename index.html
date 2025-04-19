@@ -42,6 +42,8 @@
             margin: 0 0 10px 0;
             font-size: min(2.5rem, 8vw);
             text-shadow: 2px 2px 0px #ffcdd2;
+            /* Added position relative so we can adjust on desktop */
+            position: relative;
         }
         .number-display {
             font-size: min(25rem, 25vw);
@@ -301,6 +303,29 @@
             background-color: #29b6f6;
         }
         
+        /* Desktop specific adjustments */
+        @media (min-width: 768px) {
+            /* Move title to top to prevent overlap with number */
+            h1 {
+                position: absolute;
+                top: 5vh;
+                margin-bottom: 0;
+            }
+            
+            /* Adjust container to have more space */
+            .container {
+                padding-top: 10vh;
+                min-height: 95vh;
+                justify-content: center;
+            }
+            
+            /* Adjust number position */
+            .number-display {
+                margin-top: 40px;
+                height: min(50vh, 350px);
+            }
+        }
+        
         /* Landscape orientation adjustments */
         @media (orientation: landscape) and (max-height: 600px) {
             .container {
@@ -322,6 +347,8 @@
             h1 {
                 font-size: min(2rem, 6vw);
                 margin-bottom: 5px;
+                position: relative;
+                top: 0;
             }
             
             button {
