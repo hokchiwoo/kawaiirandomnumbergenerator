@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrilling Kawaii Number Generator (1-32)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        
+        body {
+            font-family: 'Varela Round', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #fce4ec;
+            color: #f06292;
+            overflow: hidden;
+            background-image: radial-gradient(#f8bbd0 20%, transparent 20%), 
+                             radial-gradient(#f8bbd0 20%, transparent 20%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            color: #ec407a;
+            margin-bottom: 10px;
+            font-size: 3vw;
+            text-shadow: 2px 2px 0px #ffcdd2;
+        }
+        .number-display {
+            font-size: 80vw;
+            font-weight: bold;
+            color: #ec407a;
+            line-height: 0.9;
+            margin: 0;
+            height: 70vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 4px 4px 0px #ffcdd2;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .number-display::before,
+        .number-display::after {
+            content: "★";
+            position: absolute;
+            font-size: 15vw;
+            color: #f8bbd0;
+            animation: float 3s infinite alternate ease-in-out;
+        }
+        .number-display::before {
+            left: 10vw;
+            top: 10vh;
+            animation-delay: 0.5s;
+        }
+        .number-display::after {
+            right: 10vw;
+            bottom: 10vh;
+        }
+        @keyframes float {
+            from { transform: translateY(0) rotate(5deg); }
+            to { transform: translateY(-20px) rotate(-5deg); }
+        }
+        
+        /* Thrilling animations */
+        .shake {
+            animation: shake 0.1s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-2px, -2px) rotate(-1deg); }
+            50% { transform: translate(2px, -1px) rotate(1deg); }
+            75% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+            100% { transform: translate(1px, -1px) rotate(1deg); }
+        }
+        
+        .pulse {
+            animation: pulse 0.6s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        .spin {
+            animation: spin 1s forwards;
+        }
+        @keyframes spin {
+            0% { transform: scale(0.8) rotate(0deg); }
+            100% { transform: scale(0.8) rotate(360deg); }
+        }
+        
+        .grow {
+            animation: grow 0.7s infinite alternate;
+        }
+        @keyframes grow {
+            0% { transform: scale(0.7); }
+            100% { transform: scale(1.2); }
+        }
+        
+        .reveal {
+            animation: kawaiiBounce 1s forwards ease-out;
+        }
+        @keyframes kawaiiBounce {
+            0% { transform: scale(0.1); opacity: 0; }
+            10% { transform: scale(1.5); }
+            25% { transform: scale(0.8); }
+            40% { transform: scale(1.3); }
+            55% { transform: scale(0.9); }
+            70% { transform: scale(1.1); }
+            85% { transform: scale(0.95); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ec407a;
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+            transition: opacity 0.05s;
+        }
+        
+        button {
+            background-color: #f48fb1;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #ec407a;
+            margin-top: 20px;
+            font-family: 'Varela Round', sans-serif;
+            position: relative;
+            z-index: 10;
+        }
+        button:hover {
+            background-color: #f06292;
+            transform: translateY(-3px);
+            animation: buttonPulse 1s infinite alternate;
+        }
+        @keyframes buttonPulse {
+            0% { transform: translateY(-3px) scale(1); }
+            100% { transform: translateY(-3px) scale(1.05); }
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #ec407a;
+        }
+        .range {
+            margin-top: 10px;
+            color: #ec407a;
+            font-size: 1.2rem;
+        }
+        .hearts {
+            position: absolute;
+            font-size: 24px;
+            color: #f48fb1;
+            opacity: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .character {
+            position: absolute;
+            bottom: 20px;
+            width: 100px;
+            height: 100px;
+            background: #f8bbd0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 3px solid #ec407a;
+            transition: all 0.3s ease;
+        }
+        .character.left {
+            left: 5%;
+        }
+        .character.right {
+            right: 5%;
+        }
+        .face {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .eyes {
+            display: flex;
+            width: 60px;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .eye {
+            width: 10px;
+            height: 15px;
+            background: #ec407a;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .mouth {
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid #ec407a;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .blush {
+            position: absolute;
+            width: 15px;
+            height: 7px;
+            background: rgba(236, 64, 122, 0.3);
+            border-radius: 50%;
+        }
+        .blush.left {
+            left: 20px;
+            top: 50px;
+        }
+        .blush.right {
+            right: 20px;
+            top: 50px;
+        }
+        
+        .sweat {
+            position: absolute;
+            width: 5px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sweat.left {
+            left: 15px;
+            top: 30px;
+        }
+        .sweat.right {
+            right: 15px;
+            top: 30px;
+        }
+        
+        .dramatic-text {
+            position: absolute;
+            font-size: 8vw;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 0 #ad1457, -2px -2px 0 #ad1457, 2px -2px 0 #ad1457, -2px 2px 0 #ad1457;
+            opacity: 0;
+            z-index: 10;
+            transform: rotate(-5deg);
+        }
+        
+        @media (max-width: 480px) {
+            .number-display {
+                font-size: 80vw;
+                height: 60vh;
+            }
+            h1 {
+                font-size: 7vw;
+            }
+            .character {
+                width: 70px;
+                height: 70px;
+            }
+            .eyes {
+                width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <h1>Kawaii Number Generator</h1>
+        <div class="number-display" id="result">?</div>
+        <button onclick="generateNumber()">Pick a Number!</button>
+        <p class="range">✧₊˚ 1 to 32 ˚₊✧</p>
+    </div>
+    
+    <div class="character left" id="charLeft">
+        <div class="face">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div class="mouth"></div>
+        </div>
+        <div class="blush left"></div>
+        <div class="blush right"></div>
+        <div class="sweat left"></div>
+        <div class="sweat right"></div>
+    </div>
+    
+    <div class="character right" id="charRight">
+        <div class="face">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div class="mouth"></div>
+        </div>
+        <div class="blush left"></div>
+        <div class="blush right"></div>
+        <div class="sweat left"></div>
+        <div class="sweat right"></div>
+    </div>
+    
+    <div class="dramatic-text" id="dramaticText"></div>
+
+    <script>
+        function generateNumber() {
+            const resultElement = document.getElementById('result');
+            const overlay = document.getElementById('overlay');
+            const charLeft = document.getElementById('charLeft');
+            const charRight = document.getElementById('charRight');
+            const dramaticText = document.getElementById('dramaticText');
+            
+            // Disable button during animation
+            document.querySelector('button').disabled = true;
+            
+            // Start with questioning
+            resultElement.textContent = "?";
+            
+            // Reset characters to normal
+            resetCharacters();
+            
+            // Phase 1: Nervous anticipation
+            makeCharactersNervous();
+            
+            // Dramatic phrases
+            const dramaticPhrases = [
+                "OMG!", 
+                "So tense!", 
+                "ドキドキ!", // Japanese for heart-pounding
+                "Eek!",
+                "Can't look!",
+                "So exciting!",
+                "What will it be?!",
+                "The suspense!",
+                "(*ﾟﾛﾟ)", // Shocked face emoticon
+                "Wow!",
+                "Oh my!",
+                "Here it comes!",
+                "Hold on tight!",
+                "Ahhhh!",
+                "(⊙_⊙)",
+                "Kyaaaa!",
+                "So nervous!",
+                "Oh dear!",
+                "ワクワク!" // Japanese for excited
+            ];
+            
+            // Sequence of thrilling animations
+            let currentPhase = 0;
+            const phases = [
+                { animation: "shake", duration: 1000, text: getRandomPhrase() },
+                { animation: "pulse", duration: 1200, text: getRandomPhrase() },
+                { animation: "grow", duration: 1500, text: getRandomPhrase() },
+                { animation: "spin", duration: 800, text: getRandomPhrase() },
+                { animation: "shake", duration: 500, text: "!!!" }
+            ];
+            
+            function getRandomPhrase() {
+                return dramaticPhrases[Math.floor(Math.random() * dramaticPhrases.length)];
+            }
+            
+            function runPhase() {
+                if (currentPhase < phases.length) {
+                    const phase = phases[currentPhase];
+                    
+                    // Apply animation
+                    resultElement.className = `number-display ${phase.animation}`;
+                    
+                    // Random flashing
+                    if (Math.random() > 0.7) {
+                        flashScreen();
+                    }
+                    
+                    // Change numbers rapidly
+                    if (phase.animation !== "spin") {
+                        clearInterval(numInterval);
+                        numInterval = setInterval(() => {
+                            resultElement.textContent = Math.floor(Math.random() * 32) + 1;
+                        }, 100);
+                    }
+                    
+                    // Show dramatic text
+                    if (phase.text) {
+                        showDramaticText(phase.text);
+                    }
+                    
+                    // Randomly make characters more nervous
+                    if (Math.random() > 0.5) {
+                        increaseNervousness();
+                    }
+                    
+                    // Move to next phase
+                    currentPhase++;
+                    setTimeout(runPhase, phase.duration);
+                } else {
+                    // Final phase - reveal
+                    clearInterval(numInterval);
+                    
+                    // Dramatic pause with suspense
+                    resultElement.className = "number-display";
+                    resultElement.textContent = "...";
+                    
+                    // Big flash before reveal
+                    setTimeout(() => {
+                        flashScreen(0.8);
+                        
+                        setTimeout(() => {
+                            // Reveal the number!
+                            const finalNumber = Math.floor(Math.random() * 32) + 1;
+                            resultElement.className = "number-display reveal";
+                            resultElement.textContent = finalNumber;
+                            
+                            // Characters react with joy
+                            setTimeout(() => {
+                                makeCharactersHappy();
+                                createHearts();
+                                
+                                // Random happy phrases with "Unlucky you" added
+                                const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡"];
+                                const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                                showDramaticText(randomHappyPhrase, true);
+                                
+                                // Re-enable button
+                                document.querySelector('button').disabled = false;
+                            }, 500);
+                        }, 300);
+                    }, 1000);
+                }
+            }
+            
+            // Start the first phase
+            let numInterval = setInterval(() => {
+                resultElement.textContent = Math.floor(Math.random() * 32) + 1;
+            }, 150);
+            
+            setTimeout(runPhase, 500);
+        }
+        
+        function flashScreen(intensity = 0.3) {
+            const overlay = document.getElementById('overlay');
+            overlay.style.opacity = intensity;
+            setTimeout(() => {
+                overlay.style.opacity = 0;
+            }, 100);
+        }
+        
+        function showDramaticText(text, isHappy = false) {
+            const dramaticText = document.getElementById('dramaticText');
+            dramaticText.textContent = text;
+            dramaticText.style.color = isHappy ? "#ffeb3b" : "white";
+            dramaticText.style.opacity = 1;
+            dramaticText.style.top = `${Math.random() * 50 + 25}%`;
+            dramaticText.style.left = `${Math.random() * 70 + 15}%`;
+            dramaticText.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            
+            setTimeout(() => {
+                dramaticText.style.opacity = 0;
+            }, 800);
+        }
+        
+        function makeCharactersNervous() {
+            const eyes = document.querySelectorAll('.eye');
+            const mouths = document.querySelectorAll('.mouth');
+            const sweats = document.querySelectorAll('.sweat');
+            const chars = document.querySelectorAll('.character');
+            
+            eyes.forEach(eye => {
+                eye.style.height = '7px';
+            });
+            
+            mouths.forEach(mouth => {
+                mouth.style.width = '10px';
+                mouth.style.height = '10px';
+            });
+            
+            sweats.forEach(sweat => {
+                sweat.style.opacity = '0.7';
+            });
+            
+            chars.forEach(char => {
+                char.style.animation = 'shake 0.5s infinite';
+            });
+        }
+        
+        function increaseNervousness() {
+            const chars = document.querySelectorAll('.character');
+            const mouths = document.querySelectorAll('.mouth');
+            
+            chars.forEach(char => {
+                char.style.animation = 'shake 0.2s infinite';
+            });
+            
+            mouths.forEach(mouth => {
+                mouth.style.width = '8px';
+                mouth.style.height = '8px';
+            });
+        }
+        
+        function makeCharactersHappy() {
+            const eyes = document.querySelectorAll('.eye');
+            const mouths = document.querySelectorAll('.mouth');
+            const sweats = document.querySelectorAll('.sweat');
+            const chars = document.querySelectorAll('.character');
+            
+            eyes.forEach(eye => {
+                eye.style.height = '10px';
+                eye.style.borderRadius = '50% 50% 0 0';
+            });
+            
+            mouths.forEach(mouth => {
+                mouth.style.borderBottom = 'none';
+                mouth.style.borderRadius = '50%';
+                mouth.style.height = '15px';
+                mouth.style.width = '20px';
+                mouth.style.background = '#ec407a';
+            });
+            
+            sweats.forEach(sweat => {
+                sweat.style.opacity = '0';
+            });
+            
+            chars.forEach(char => {
+                char.style.animation = 'bounce 0.5s infinite alternate';
+            });
+            
+            // Add bounce animation dynamically
+            const keyframes = `
+                @keyframes bounce {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-10px); }
+                }
+            `;
+            
+            const styleSheet = document.createElement('style');
+            styleSheet.type = 'text/css';
+            styleSheet.innerText = keyframes;
+            document.head.appendChild(styleSheet);
+        }
+        
+        function resetCharacters() {
+            const eyes = document.querySelectorAll('.eye');
+            const mouths = document.querySelectorAll('.mouth');
+            const sweats = document.querySelectorAll('.sweat');
+            const chars = document.querySelectorAll('.character');
+            
+            eyes.forEach(eye => {
+                eye.style.height = '15px';
+                eye.style.borderRadius = '50%';
+            });
+            
+            mouths.forEach(mouth => {
+                mouth.style.borderBottom = '3px solid #ec407a';
+                mouth.style.borderRadius = '50%';
+                mouth.style.height = '10px';
+                mouth.style.width = '20px';
+                mouth.style.background = 'transparent';
+            });
+            
+            sweats.forEach(sweat => {
+                sweat.style.opacity = '0';
+            });
+            
+            chars.forEach(char => {
+                char.style.animation = 'none';
+            });
+        }
+        
+        function createHearts() {
+            const symbols = ['♥', '♡', '✧', '✿', '★'];
+            const colors = ['#f06292', '#ec407a', '#ad1457', '#ff94c2', '#c2185b'];
+            
+            for (let i = 0; i < 100; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'hearts';
+                
+                // Random properties
+                const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = Math.random() * 30 + 15;
+                
+                // Set content and style
+                heart.innerHTML = symbol;
+                heart.style.fontSize = `${size}px`;
+                heart.style.color = color;
+                
+                // Position around the center
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 300 + 50;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                
+                heart.style.left = `${x}px`;
+                heart.style.top = `${y}px`;
+                document.body.appendChild(heart);
+                
+                // Create animation
+                heart.style.animation = `heartFloat ${Math.random() * 2 + 2}s forwards ease-out`;
+                
+                const keyframes = `
+                    @keyframes heartFloat {
+                        0% { 
+                            transform: translate(0, 0) scale(0); 
+                            opacity: 0;
+                        }
+                        20% {
+                            opacity: 1;
+                        }
+                        100% { 
+                            transform: translate(${Math.random() * 150 - 75}px, ${Math.random() * -250 - 50}px) scale(1); 
+                            opacity: 0;
+                        }
+                    }
+                `;
+                
+                const styleSheet = document.createElement('style');
+                styleSheet.type = 'text/css';
+                styleSheet.innerText = keyframes;
+                document.head.appendChild(styleSheet);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    heart.remove();
+                    styleSheet.remove();
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>
