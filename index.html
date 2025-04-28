@@ -111,7 +111,7 @@
         }
         
         .grow {
-            animation: grow 0.7s infinite alternate;
+            animation: grow 0.5s infinite alternate;
         }
         @keyframes grow {
             0% { transform: scale(0.7); }
@@ -176,6 +176,10 @@
             font-family: 'Varela Round', sans-serif;
             position: relative;
             z-index: 10;
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+            touch-action: manipulation; /* Improve touch responsiveness */
+            outline: none; /* Remove outline */
+            user-select: none; /* Prevent text selection */
         }
         button:hover {
             background-color: #f06292;
@@ -189,6 +193,14 @@
         button:active {
             transform: translateY(0);
             box-shadow: 0 2px 0 #ec407a;
+        }
+        button:disabled {
+            background-color: #ffcdd2;
+            box-shadow: 0 3px 0 #ef9a9a;
+            transform: none;
+            animation: none;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         .range {
             margin-top: 10px;
@@ -284,13 +296,20 @@
         
         .dramatic-text {
             position: absolute;
-            font-size: min(4rem, 8vw);
+            font-size: min(3.5rem, 7vw);
             font-weight: bold;
             color: white;
             text-shadow: 2px 2px 0 #ad1457, -2px -2px 0 #ad1457, 2px -2px 0 #ad1457, -2px 2px 0 #ad1457;
             opacity: 0;
             z-index: 10;
             transform: rotate(-5deg);
+            text-align: center;
+            max-width: 80vw;
+            padding: 10px;
+            border-radius: 20px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+            box-sizing: border-box;
         }
         
         /* Reset Button */
@@ -310,17 +329,24 @@
             right: 20px;
             width: 40px;
             height: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            max-width: 40px;
+            max-height: 40px;
+            padding: 0;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            clip-path: circle(50%);
+            display: grid;
+            place-items: center;
             cursor: pointer;
             z-index: 20;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             border: none;
-            padding: 0;
             transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            transform: scale(1);
+            box-sizing: border-box;
         }
         
         .sound-btn:hover {
@@ -328,10 +354,16 @@
             background-color: white;
         }
         
+        .sound-btn:active {
+            transform: scale(0.95);
+        }
+        
         .sound-icon {
             width: 20px;
             height: 20px;
             fill: #ec407a;
+            pointer-events: none;
+            margin: 0;
         }
         
         .sound-btn .muted {
@@ -344,6 +376,17 @@
         
         .sound-btn.muted .muted {
             display: block;
+        }
+        
+        .button-container {
+            margin-top: 20px;
+            z-index: 10;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-height: 70px; /* Ensure consistent height */
         }
         
         /* Desktop specific adjustments */
@@ -366,6 +409,16 @@
             .number-display {
                 margin-top: 40px;
                 height: min(50vh, 350px);
+            }
+            
+            .dramatic-text {
+                font-size: min(4rem, 6vw);
+                max-width: 60vw;
+            }
+            
+            button {
+                min-width: 200px;
+                padding: 15px 40px;
             }
         }
         
@@ -394,12 +447,21 @@
                 top: 0;
             }
             
-            button {
+            .button-container {
                 margin-top: 10px;
+            }
+            
+            button {
+                padding: 10px 25px;
+                margin-top: 5px;
             }
             
             .range {
                 margin-top: 5px;
+            }
+            
+            .dramatic-text {
+                font-size: min(2.5rem, 6vw);
             }
         }
         
@@ -411,7 +473,7 @@
             }
             
             .dramatic-text {
-                font-size: min(3rem, 10vw);
+                font-size: min(2.5rem, 8vw);
             }
             
             .sound-btn {
@@ -419,6 +481,15 @@
                 right: 10px;
                 width: 35px;
                 height: 35px;
+                min-width: 35px;
+                min-height: 35px;
+                max-width: 35px;
+                max-height: 35px;
+            }
+            
+            button {
+                min-width: 150px;
+                min-height: 44px; /* Better tap target */
             }
         }
     </style>
@@ -429,12 +500,14 @@
     <div class="container">
         <h1>Kawaii Number Generator</h1>
         <div class="number-display" id="result">?</div>
-        <button id="generateBtn" onclick="generateNumber()">Pick a Number!</button>
-        <button id="resetBtn" class="button reset-btn" onclick="resetGenerator()">Start Over!</button>
+        <div class="button-container">
+            <button id="generateBtn">Pick a Number!</button>
+            <button id="resetBtn" class="reset-btn">Start Over!</button>
+        </div>
         <p class="range">✧₊˚ 1 to 32 ˚₊✧</p>
     </div>
     
-    <button class="sound-btn" id="soundToggle" onclick="toggleSound()">
+    <button class="sound-btn" id="soundToggle" type="button">
         <svg class="sound-icon unmuted" viewBox="0 0 24 24">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         </svg>
@@ -478,10 +551,13 @@
         let availableNumbers = [];
         let selectedNumbers = [];
         const maxNumber = 32;
+        let isGenerating = false; // Track generation state
         
         // Audio context
         let audioCtx;
         let isSoundEnabled = true;
+        let audioNodesInUse = []; // Track audio nodes to clean up properly
+        let soundRefreshCounter = 0; // Counter to refresh audio context periodically
         
         // Initialize number tracking
         function initializeGenerator() {
@@ -489,11 +565,85 @@
             
             // Initialize audio context on first user interaction
             document.addEventListener('click', initAudio, {once: true});
+            
+            // Add event listeners
+            document.getElementById('generateBtn').addEventListener('click', handleGenerateClick);
+            document.getElementById('resetBtn').addEventListener('click', resetGenerator);
+            document.getElementById('soundToggle').addEventListener('click', toggleSound);
         }
         
+        // Debounce function to prevent multiple rapid clicks
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        const handleGenerateClick = debounce(function() {
+            if (!isGenerating) {
+                generateNumber();
+            }
+        }, 300);
+        
         function initAudio() {
-            // Create audio context
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                // Create audio context
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error("Web Audio API not supported:", e);
+            }
+        }
+        
+        // Function to ensure audio context is running
+        function resumeAudioContext() {
+            if (!audioCtx) {
+                try {
+                    initAudio();
+                } catch (e) {
+                    console.error("Error initializing audio context:", e);
+                    return false;
+                }
+            }
+            
+            // Check if context is in suspended state (autoplay policy)
+            if (audioCtx.state === 'suspended') {
+                try {
+                    audioCtx.resume();
+                } catch (e) {
+                    console.error("Error resuming audio context:", e);
+                    return false;
+                }
+            }
+            
+            // Periodically refresh audio context to prevent issues
+            soundRefreshCounter++;
+            if (soundRefreshCounter > 10) {
+                cleanupAllAudioNodes();
+                soundRefreshCounter = 0;
+            }
+            
+            return true;
+        }
+        
+        // Function to clean up all audio nodes
+        function cleanupAllAudioNodes() {
+            try {
+                // Disconnect and clean up all tracked nodes
+                while (audioNodesInUse.length > 0) {
+                    const node = audioNodesInUse.pop();
+                    if (node && typeof node.disconnect === 'function') {
+                        node.disconnect();
+                    }
+                }
+            } catch (e) {
+                console.error("Error cleaning up audio nodes:", e);
+            }
         }
         
         function toggleSound() {
@@ -502,115 +652,559 @@
             
             if (isSoundEnabled) {
                 soundBtn.classList.remove('muted');
+                playKawaiiSound('toggle_on');
             } else {
                 soundBtn.classList.add('muted');
+                playKawaiiSound('toggle_off');
+                
+                // Clean up audio resources when muting
+                cleanupAllAudioNodes();
             }
         }
         
-        // Sound effects
+        // Enhanced Sound effects with improved resource management
         function playKawaiiSound(type) {
-            if (!audioCtx || !isSoundEnabled) return;
+            if (!isSoundEnabled) return;
             
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            // Resume or initialize audio context
+            if (!resumeAudioContext()) return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            switch(type) {
-                case 'button':
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                    oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
-                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.3);
-                    break;
-                    
-                case 'countdown':
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
-                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.1);
-                    break;
-                    
-                case 'reveal':
-                    // Happy chord
-                    playChord([523.25, 659.25, 783.99], 0.4); // C5, E5, G5
-                    break;
-                    
-                case 'fake':
-                    // Confusion sound
-                    oscillator.type = 'triangle';
-                    oscillator.frequency.setValueAtTime(466.16, audioCtx.currentTime); // Bb4
-                    oscillator.frequency.exponentialRampToValueAtTime(369.99, audioCtx.currentTime + 0.3); // F#4
-                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.4);
-                    break;
-                    
-                case 'dramatic':
-                    oscillator.type = 'sawtooth';
-                    oscillator.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
-                    oscillator.frequency.exponentialRampToValueAtTime(233.08, audioCtx.currentTime + 0.3); // Bb3
-                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.2);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.4);
-                    break;
-                    
-                case 'success':
-                    // Play a rising arpeggio
-                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                    
-                    notes.forEach((note, i) => {
+            try {
+                // Master gain node for all sounds
+                const masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.4; // Control overall volume
+                masterGain.connect(audioCtx.destination);
+                
+                // Track this node for cleanup
+                audioNodesInUse.push(masterGain);
+                
+                // Keep track of nodes created for this sound
+                const localNodes = [masterGain];
+                
+                switch(type) {
+                    case 'button':
+                        // Bright, springy button sound
+                        const buttonOsc1 = audioCtx.createOscillator();
+                        const buttonOsc2 = audioCtx.createOscillator();
+                        const buttonGain = audioCtx.createGain();
+                        
+                        buttonOsc1.connect(buttonGain);
+                        buttonOsc2.connect(buttonGain);
+                        buttonGain.connect(masterGain);
+                        
+                        localNodes.push(buttonOsc1, buttonOsc2, buttonGain);
+                        
+                        buttonOsc1.type = 'sine';
+                        buttonOsc2.type = 'triangle';
+                        
+                        // Cheerful melody
+                        buttonOsc1.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                        buttonOsc1.frequency.exponentialRampToValueAtTime(1046.5, audioCtx.currentTime + 0.1); // C6
+                        
+                        buttonOsc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+                        buttonOsc2.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.08); // G5
+                        
+                        buttonGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                        buttonGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                        
+                        buttonOsc1.start();
+                        buttonOsc2.start();
+                        buttonOsc1.stop(audioCtx.currentTime + 0.3);
+                        buttonOsc2.stop(audioCtx.currentTime + 0.3);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 400);
+                        break;
+                        
+                    case 'countdown1':
+                        // Exciting whoosh sound for phase 1
+                        const whoosh1 = audioCtx.createOscillator();
+                        const whooshFilter = audioCtx.createBiquadFilter();
+                        const whooshGain = audioCtx.createGain();
+                        
+                        whoosh1.connect(whooshFilter);
+                        whooshFilter.connect(whooshGain);
+                        whooshGain.connect(masterGain);
+                        
+                        localNodes.push(whoosh1, whooshFilter, whooshGain);
+                        
+                        whooshFilter.type = 'lowpass';
+                        whooshFilter.frequency.setValueAtTime(100, audioCtx.currentTime);
+                        whooshFilter.frequency.exponentialRampToValueAtTime(3000, audioCtx.currentTime + 0.3);
+                        
+                        whoosh1.type = 'sawtooth';
+                        whoosh1.frequency.setValueAtTime(150, audioCtx.currentTime);
+                        whoosh1.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.4);
+                        
+                        whooshGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        whooshGain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                        whooshGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                        
+                        whoosh1.start();
+                        whoosh1.stop(audioCtx.currentTime + 0.4);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 500);
+                        break;
+                        
+                    case 'countdown2':
+                        // Bubbly countdown sound for phase 2
+                        const bubble = audioCtx.createOscillator();
+                        const bubbleGain = audioCtx.createGain();
+                        
+                        bubble.connect(bubbleGain);
+                        bubbleGain.connect(masterGain);
+                        
+                        localNodes.push(bubble, bubbleGain);
+                        
+                        bubble.type = 'sine';
+                        bubble.frequency.setValueAtTime(800, audioCtx.currentTime);
+                        bubble.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+                        bubble.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.2);
+                        
+                        bubbleGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                        bubbleGain.gain.setValueAtTime(0.3, audioCtx.currentTime + 0.05);
+                        bubbleGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        
+                        bubble.start();
+                        bubble.stop(audioCtx.currentTime + 0.2);
+                        
+                        // Add a tiny echo
                         setTimeout(() => {
-                            const osc = audioCtx.createOscillator();
-                            const gain = audioCtx.createGain();
+                            if (!isSoundEnabled) return;
                             
-                            osc.connect(gain);
-                            gain.connect(audioCtx.destination);
+                            try {
+                                const echo = audioCtx.createOscillator();
+                                const echoGain = audioCtx.createGain();
+                                
+                                echo.connect(echoGain);
+                                echoGain.connect(masterGain);
+                                
+                                localNodes.push(echo, echoGain);
+                                
+                                echo.type = 'sine';
+                                echo.frequency.setValueAtTime(600, audioCtx.currentTime);
+                                
+                                echoGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                                echoGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                                
+                                echo.start();
+                                echo.stop(audioCtx.currentTime + 0.1);
+                            } catch (e) {
+                                console.error("Echo effect error:", e);
+                            }
+                        }, 100);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 400);
+                        break;
+                        
+                    case 'countdown3':
+                        // Exciting ping for phase 3
+                        const ping = audioCtx.createOscillator();
+                        const pingGain = audioCtx.createGain();
+                        
+                        // Check if the browser supports StereoPannerNode
+                        let pingPong;
+                        try {
+                            pingPong = audioCtx.createStereoPanner();
+                            ping.connect(pingGain);
+                            pingGain.connect(pingPong);
+                            pingPong.connect(masterGain);
                             
-                            osc.type = 'sine';
-                            osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+                            // Bounce from left to right
+                            pingPong.pan.setValueAtTime(-0.8, audioCtx.currentTime);
+                            pingPong.pan.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.3);
                             
-                            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                            localNodes.push(ping, pingGain, pingPong);
+                        } catch (e) {
+                            // Fallback for browsers without StereoPanner support
+                            console.warn("StereoPanner not supported, using regular connection");
+                            ping.connect(pingGain);
+                            pingGain.connect(masterGain);
+                            localNodes.push(ping, pingGain);
+                        }
+                        
+                        ping.type = 'triangle';
+                        ping.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                        ping.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.3);
+                        
+                        pingGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                        pingGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                        
+                        ping.start();
+                        ping.stop(audioCtx.currentTime + 0.3);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 400);
+                        break;
+                        
+                    case 'dramatic':
+                        // Dramatic tension sound
+                        const tension = audioCtx.createOscillator();
+                        const tensionGain = audioCtx.createGain();
+                        
+                        tension.connect(tensionGain);
+                        tensionGain.connect(masterGain);
+                        
+                        localNodes.push(tension, tensionGain);
+                        
+                        // Simplified version without LFO for better compatibility
+                        tension.type = 'sawtooth';
+                        tension.frequency.setValueAtTime(150, audioCtx.currentTime);
+                        tension.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.4);
+                        
+                        tensionGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                        tensionGain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.2);
+                        tensionGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                        
+                        tension.start();
+                        tension.stop(audioCtx.currentTime + 0.4);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 500);
+                        break;
+                        
+                    case 'reveal':
+                        // Magical reveal sound - simplified for reliability
+                        const magicalChime = audioCtx.createOscillator();
+                        const magicalGain = audioCtx.createGain();
+                        
+                        magicalChime.connect(magicalGain);
+                        magicalGain.connect(masterGain);
+                        
+                        localNodes.push(magicalChime, magicalGain);
+                        
+                        magicalChime.type = 'sine';
+                        magicalChime.frequency.setValueAtTime(1046.50, audioCtx.currentTime); // C6
+                        magicalChime.frequency.exponentialRampToValueAtTime(1567.98, audioCtx.currentTime + 0.3); // G6
+                        
+                        magicalGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        magicalGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                        magicalGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                        
+                        magicalChime.start();
+                        magicalChime.stop(audioCtx.currentTime + 0.5);
+                        
+                        // Add a shimmer effect with a small delay
+                        setTimeout(() => {
+                            if (!isSoundEnabled) return;
                             
-                            osc.start();
-                            osc.stop(audioCtx.currentTime + 0.3);
-                        }, i * 100);
-                    });
-                    
-                    break;
+                            try {
+                                const shimmer = audioCtx.createOscillator();
+                                const shimmerGain = audioCtx.createGain();
+                                
+                                shimmer.connect(shimmerGain);
+                                shimmerGain.connect(masterGain);
+                                
+                                localNodes.push(shimmer, shimmerGain);
+                                
+                                shimmer.type = 'triangle';
+                                shimmer.frequency.setValueAtTime(2093.00, audioCtx.currentTime); // C7
+                                
+                                shimmerGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                                shimmerGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+                                shimmerGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                                
+                                shimmer.start();
+                                shimmer.stop(audioCtx.currentTime + 0.3);
+                            } catch (e) {
+                                console.error("Shimmer effect error:", e);
+                            }
+                        }, 100);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 600);
+                        break;
+                        
+                    case 'fake':
+                        // Comical/confused sound - simplified
+                        const confused = audioCtx.createOscillator();
+                        const confusedGain = audioCtx.createGain();
+                        
+                        confused.connect(confusedGain);
+                        confusedGain.connect(masterGain);
+                        
+                        localNodes.push(confused, confusedGain);
+                        
+                        confused.type = 'triangle';
+                        confused.frequency.setValueAtTime(400, audioCtx.currentTime);
+                        confused.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.2);
+                        confused.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.3);
+                        
+                        confusedGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        confusedGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                        confusedGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                        
+                        confused.start();
+                        confused.stop(audioCtx.currentTime + 0.4);
+                        
+                        // Add a descending "womp" sound
+                        setTimeout(() => {
+                            if (!isSoundEnabled) return;
+                            
+                            try {
+                                const womp = audioCtx.createOscillator();
+                                const wompGain = audioCtx.createGain();
+                                
+                                womp.connect(wompGain);
+                                wompGain.connect(masterGain);
+                                
+                                localNodes.push(womp, wompGain);
+                                
+                                womp.type = 'sine';
+                                womp.frequency.setValueAtTime(300, audioCtx.currentTime);
+                                womp.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+                                
+                                wompGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                                wompGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                                
+                                womp.start();
+                                womp.stop(audioCtx.currentTime + 0.3);
+                            } catch (e) {
+                                console.error("Womp effect error:", e);
+                            }
+                        }, 150);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 500);
+                        break;
+                        
+                    case 'success':
+                        // Simplified success sound
+                        const successOsc = audioCtx.createOscillator();
+                        const successGain = audioCtx.createGain();
+                        
+                        successOsc.connect(successGain);
+                        successGain.connect(masterGain);
+                        
+                        localNodes.push(successOsc, successGain);
+                        
+                        successOsc.type = 'sine';
+                        successOsc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                        successOsc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                        
+                        successGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        successGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+                        successGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                        
+                        successOsc.start();
+                        successOsc.stop(audioCtx.currentTime + 0.4);
+                        
+                        // Add a happy sparkle after a short delay
+                        setTimeout(() => {
+                            if (!isSoundEnabled) return;
+                            
+                            try {
+                                const sparkle = audioCtx.createOscillator();
+                                const sparkleGain = audioCtx.createGain();
+                                
+                                sparkle.connect(sparkleGain);
+                                sparkleGain.connect(masterGain);
+                                
+                                localNodes.push(sparkle, sparkleGain);
+                                
+                                sparkle.type = 'sine';
+                                sparkle.frequency.setValueAtTime(1318.51, audioCtx.currentTime); // E6
+                                
+                                sparkleGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                                sparkleGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+                                sparkleGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                                
+                                sparkle.start();
+                                sparkle.stop(audioCtx.currentTime + 0.2);
+                            } catch (e) {
+                                console.error("Sparkle effect error:", e);
+                            }
+                        }, 200);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 500);
+                        break;
+                        
+                    case 'toggle_on':
+                        // Bright toggle on sound
+                        const toggleOn = audioCtx.createOscillator();
+                        const toggleOnGain = audioCtx.createGain();
+                        
+                        toggleOn.connect(toggleOnGain);
+                        toggleOnGain.connect(masterGain);
+                        
+                        localNodes.push(toggleOn, toggleOnGain);
+                        
+                        toggleOn.type = 'sine';
+                        toggleOn.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                        toggleOn.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                        
+                        toggleOnGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        toggleOnGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+                        toggleOnGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        
+                        toggleOn.start();
+                        toggleOn.stop(audioCtx.currentTime + 0.2);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 300);
+                        break;
+                        
+                    case 'toggle_off':
+                        // Soft toggle off sound
+                        const toggleOff = audioCtx.createOscillator();
+                        const toggleOffGain = audioCtx.createGain();
+                        
+                        toggleOff.connect(toggleOffGain);
+                        toggleOffGain.connect(masterGain);
+                        
+                        localNodes.push(toggleOff, toggleOffGain);
+                        
+                        toggleOff.type = 'sine';
+                        toggleOff.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+                        toggleOff.frequency.exponentialRampToValueAtTime(587.33, audioCtx.currentTime + 0.1); // D5
+                        
+                        toggleOffGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        toggleOffGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+                        toggleOffGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        
+                        toggleOff.start();
+                        toggleOff.stop(audioCtx.currentTime + 0.2);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 300);
+                        break;
+                        
+                    case 'flash':
+                        // Bright flash sound - simplified
+                        const flash = audioCtx.createOscillator();
+                        const flashGain = audioCtx.createGain();
+                        
+                        flash.connect(flashGain);
+                        flashGain.connect(masterGain);
+                        
+                        localNodes.push(flash, flashGain);
+                        
+                        flash.type = 'sine';
+                        flash.frequency.setValueAtTime(4000, audioCtx.currentTime);
+                        flash.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                        
+                        flashGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                        flashGain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01);
+                        flashGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                        
+                        flash.start();
+                        flash.stop(audioCtx.currentTime + 0.1);
+                        
+                        // Schedule cleanup
+                        setTimeout(() => cleanupNodes(localNodes), 200);
+                        break;
+                }
+                
+                // Add all nodes to the global tracking
+                audioNodesInUse.push(...localNodes);
+                
+                // If we have too many nodes tracked, clean up the older ones
+                if (audioNodesInUse.length > 50) {
+                    cleanupOldestNodes(25); // Remove the 25 oldest nodes
+                }
+                
+            } catch (e) {
+                console.error("Error playing sound:", e);
+                // If there's an error, try to clean up and reset audio
+                cleanupAllAudioNodes();
+                
+                // Try to recreate audio context
+                if (audioCtx) {
+                    try {
+                        audioCtx.close();
+                    } catch {
+                        // Ignore close errors
+                    }
+                    audioCtx = null;
+                    initAudio();
+                }
             }
         }
         
+        // Function to clean up specific nodes
+        function cleanupNodes(nodes) {
+            try {
+                // Disconnect each node
+                nodes.forEach(node => {
+                    if (node && typeof node.disconnect === 'function') {
+                        node.disconnect();
+                    }
+                    
+                    // Remove from global tracking
+                    const index = audioNodesInUse.indexOf(node);
+                    if (index !== -1) {
+                        audioNodesInUse.splice(index, 1);
+                    }
+                });
+            } catch (e) {
+                console.error("Error cleaning up nodes:", e);
+            }
+        }
+        
+        // Function to clean up the oldest nodes when we have too many
+        function cleanupOldestNodes(count) {
+            try {
+                if (audioNodesInUse.length <= count) return;
+                
+                const nodesToRemove = audioNodesInUse.splice(0, count);
+                nodesToRemove.forEach(node => {
+                    if (node && typeof node.disconnect === 'function') {
+                        node.disconnect();
+                    }
+                });
+            } catch (e) {
+                console.error("Error cleaning up oldest nodes:", e);
+            }
+        }
+        
+        // Simplified chord player
         function playChord(frequencies, duration = 0.5) {
-            if (!audioCtx || !isSoundEnabled) return;
+            if (!isSoundEnabled) return;
             
-            frequencies.forEach(freq => {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+            // Resume or initialize audio context
+            if (!resumeAudioContext()) return;
+            
+            try {
+                const localNodes = [];
+                const masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.4;
+                masterGain.connect(audioCtx.destination);
+                localNodes.push(masterGain);
                 
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
+                frequencies.forEach(freq => {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(masterGain);
+                    
+                    localNodes.push(oscillator, gainNode);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + duration);
+                });
                 
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                // Add nodes to global tracking
+                audioNodesInUse.push(...localNodes);
                 
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                // Schedule cleanup
+                setTimeout(() => cleanupNodes(localNodes), duration * 1000 + 100);
                 
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + duration);
-            });
+            } catch (e) {
+                console.error("Error playing chord:", e);
+                // If there's an error, clean up
+                cleanupAllAudioNodes();
+            }
         }
         
         function resetNumberTracking() {
@@ -619,249 +1213,292 @@
         }
         
         function generateNumber() {
-            const resultElement = document.getElementById('result');
-            const overlay = document.getElementById('overlay');
-            const charLeft = document.getElementById('charLeft');
-            const charRight = document.getElementById('charRight');
-            const dramaticText = document.getElementById('dramaticText');
-            const generateBtn = document.getElementById('generateBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            
-            // Play button sound
-            playKawaiiSound('button');
-            
-            // Check if we have numbers available
-            if (availableNumbers.length === 0) {
-                resultElement.textContent = "All done!";
-                generateBtn.style.display = 'none';
-                resetBtn.style.display = 'inline-block';
-                return;
-            }
-            
-            // Disable button during animation
-            generateBtn.disabled = true;
-            
-            // Start with questioning
-            resultElement.textContent = "?";
-            
-            // Reset characters to normal
-            resetCharacters();
-            
-            // Phase 1: Nervous anticipation
-            makeCharactersNervous();
-            
-            // Dramatic phrases
-            const dramaticPhrases = [
-                "OMG!", 
-                "So tense!", 
-                "ドキドキ!", // Japanese for heart-pounding
-                "Eek!",
-                "Can't look!",
-                "So exciting!",
-                "What will it be?!",
-                "The suspense!",
-                "(*ﾟﾛﾟ)", // Shocked face emoticon
-                "Wow!",
-                "Oh my!",
-                "Here it comes!",
-                "Hold on tight!",
-                "Oh wow!",
-                "(⊙_⊙)",
-                "Kyaaaa!",
-                "So nervous!",
-                "Oh dear!",
-                "ワクワク!" // Japanese for excited
-            ];
-            
-            // Sequence of thrilling animations
-            let currentPhase = 0;
-            const phases = [
-                { animation: "shake", duration: 1000, text: getRandomPhrase() },
-                { animation: "pulse", duration: 1200, text: getRandomPhrase() },
-                { animation: "grow", duration: 1500, text: getRandomPhrase() },
-                { animation: "spin", duration: 800, text: getRandomPhrase() },
-                { animation: "shake", duration: 500, text: "!!!" }
-            ];
-            
-            function getRandomPhrase() {
-                return dramaticPhrases[Math.floor(Math.random() * dramaticPhrases.length)];
-            }
-            
-            function runPhase() {
-                if (currentPhase < phases.length) {
-                    const phase = phases[currentPhase];
-                    
-                    // Play sound for this phase
-                    playKawaiiSound('countdown');
-                    
-                    // Apply animation
-                    resultElement.className = `number-display ${phase.animation}`;
-                    
-                    // Random flashing
-                    if (Math.random() > 0.7) {
-                        flashScreen();
-                        playKawaiiSound('dramatic');
-                    }
-                    
-                    // Change numbers rapidly
-                    if (phase.animation !== "spin") {
-                        clearInterval(numInterval);
-                        numInterval = setInterval(() => {
-                            resultElement.textContent = Math.floor(Math.random() * 32) + 1;
-                        }, 100);
-                    }
-                    
-                    // Show dramatic text
-                    if (phase.text) {
-                        showDramaticText(phase.text);
-                    }
-                    
-                    // Randomly make characters more nervous
-                    if (Math.random() > 0.5) {
-                        increaseNervousness();
-                    }
-                    
-                    // Move to next phase
-                    currentPhase++;
-                    setTimeout(runPhase, phase.duration);
-                } else {
-                    // Final phase - reveal
-                    clearInterval(numInterval);
-                    
-                    // Dramatic pause with suspense
-                    resultElement.className = "number-display";
-                    resultElement.textContent = "...";
-                    
-                    // Big flash before reveal
-                    setTimeout(() => {
-                        flashScreen(0.8);
-                        playKawaiiSound('dramatic');
-                        
-                        // Pick from available numbers (the actual final number)
-                        const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-                        const finalNumber = availableNumbers[randomIndex];
-                        
-                        // Remove the number from available numbers
-                        availableNumbers.splice(randomIndex, 1);
-                        selectedNumbers.push(finalNumber);
-                        
-                        setTimeout(() => {
-                            // Randomly decide if we should show a fake number first (50% chance)
-                            const shouldShowFakeNumber = Math.random() < 0.5;
-                            
-                            if (shouldShowFakeNumber) {
-                                // Generate a fake number that's NOT the final number
-                                let fakeNumber;
-                                do {
-                                    fakeNumber = Math.floor(Math.random() * maxNumber) + 1;
-                                } while (fakeNumber === finalNumber);
-                                
-                                // Show fake number with slightly different animation
-                                resultElement.className = "number-display fake-reveal";
-                                resultElement.textContent = fakeNumber;
-                                playKawaiiSound('fake');
-                                
-                                // Show a "wait" reaction from characters
-                                setTimeout(() => {
-                                    makeCharactersLookConfused();
-                                    showDramaticText("...");
-                                    
-                                    // Hide the fake number - SHORTER DELAY HERE (was 1200ms)
-                                    setTimeout(() => {
-                                        resultElement.className = "number-display hide-number";
-                                        
-                                        // Then show the real number - SHORTER DELAY HERE (was 500ms)
-                                        setTimeout(() => {
-                                            // Show the real number with bounce animation
-                                            resultElement.className = "number-display reveal";
-                                            resultElement.textContent = finalNumber;
-                                            flashScreen(0.5);
-                                            playKawaiiSound('reveal');
-                                            showDramaticText("Actually...");
-                                            
-                                            // Characters react with joy
-                                            setTimeout(() => {
-                                                makeCharactersHappy();
-                                                createHearts();
-                                                playKawaiiSound('success');
-                                                
-                                                // Happy phrases
-                                                const happyPhrases = ["Yay!", "For real this time!", "わーい!", "Perfect!", "♡", "Super cute!"];
-                                                const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
-                                                showDramaticText(randomHappyPhrase, true);
-                                                
-                                                // Re-enable button
-                                                generateBtn.disabled = false;
-                                                
-                                                // Show reset button if all numbers are used
-                                                if (availableNumbers.length === 0) {
-                                                    generateBtn.style.display = 'none';
-                                                    resetBtn.style.display = 'inline-block';
-                                                }
-                                            }, 500);
-                                        }, 300);
-                                    }, 700);
-                                }, 500);
-                            } else {
-                                // No fake number, just show the real one directly
-                                resultElement.className = "number-display reveal";
-                                resultElement.textContent = finalNumber;
-                                playKawaiiSound('reveal');
-                                
-                                // Characters react with joy
-                                setTimeout(() => {
-                                    makeCharactersHappy();
-                                    createHearts();
-                                    playKawaiiSound('success');
-                                    
-                                    // Random happy phrases with "Unlucky you" added
-                                    const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
-                                    const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
-                                    showDramaticText(randomHappyPhrase, true);
-                                    
-                                    // Re-enable button
-                                    generateBtn.disabled = false;
-                                    
-                                    // Show reset button if all numbers are used
-                                    if (availableNumbers.length === 0) {
-                                        generateBtn.style.display = 'none';
-                                        resetBtn.style.display = 'inline-block';
-                                    }
-                                }, 500);
-                            }
-                        }, 300);
-                    }, 1000);
+            try {
+                // Mark that we're currently generating to prevent multiple clicks
+                isGenerating = true;
+                
+                const resultElement = document.getElementById('result');
+                const overlay = document.getElementById('overlay');
+                const charLeft = document.getElementById('charLeft');
+                const charRight = document.getElementById('charRight');
+                const dramaticText = document.getElementById('dramaticText');
+                const generateBtn = document.getElementById('generateBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                
+                // Play button sound
+                playKawaiiSound('button');
+                
+                // Check if we have numbers available
+                if (availableNumbers.length === 0) {
+                    resultElement.textContent = "All done!";
+                    generateBtn.style.display = 'none';
+                    resetBtn.style.display = 'block';
+                    isGenerating = false;
+                    return;
                 }
+                
+                // Disable button during animation
+                generateBtn.disabled = true;
+                
+                // Start with questioning
+                resultElement.textContent = "?";
+                
+                // Reset characters to normal
+                resetCharacters();
+                
+                // Phase 1: Nervous anticipation
+                makeCharactersNervous();
+                
+                // Dramatic phrases
+                const dramaticPhrases = [
+                    "OMG!", 
+                    "So tense!", 
+                    "ドキドキ!", // Japanese for heart-pounding
+                    "Eek!",
+                    "Can't look!",
+                    "So exciting!",
+                    "What will it be?!",
+                    "The suspense!",
+                    "(*ﾟﾛﾟ)", // Shocked face emoticon
+                    "Wow!",
+                    "Oh my!",
+                    "Here it comes!",
+                    "Hold on tight!",
+                    "Oh wow!",
+                    "(⊙_⊙)",
+                    "Kyaaaa!",
+                    "So nervous!",
+                    "Oh dear!",
+                    "ワクワク!", // Japanese for excited
+                    "はらはら", // Japanese for nervous tension
+                    "膽戰心驚", // Chinese for heart-pounding with fear
+                    "Not me please", // English expression of anxiety
+                    "(･_･;", // Nervous emoticon
+                    "╭(°A°`)╮" // Shock/surprise emoticon
+                ];
+                
+                // SHORTENED: Sequence of thrilling animations (reduced to 3 phases)
+                let currentPhase = 0;
+                const phases = [
+                    { animation: "shake", duration: 700, text: getRandomPhrase(), sound: 'countdown1' },
+                    { animation: "pulse", duration: 700, text: getRandomPhrase(), sound: 'countdown2' },
+                    { animation: "spin", duration: 700, text: "!!!", sound: 'countdown3' }
+                ];
+                
+                function getRandomPhrase() {
+                    return dramaticPhrases[Math.floor(Math.random() * dramaticPhrases.length)];
+                }
+                
+                let numInterval;
+                
+                function runPhase() {
+                    if (currentPhase < phases.length) {
+                        const phase = phases[currentPhase];
+                        
+                        // Play sound for this phase
+                        playKawaiiSound(phase.sound);
+                        
+                        // Apply animation
+                        resultElement.className = `number-display ${phase.animation}`;
+                        
+                        // Random flashing
+                        if (Math.random() > 0.6) {
+                            flashScreen();
+                            playKawaiiSound('flash');
+                        }
+                        
+                        // Change numbers rapidly
+                        if (phase.animation !== "spin") {
+                            clearInterval(numInterval);
+                            numInterval = setInterval(() => {
+                                resultElement.textContent = Math.floor(Math.random() * 32) + 1;
+                            }, 100);
+                        }
+                        
+                        // Show dramatic text
+                        if (phase.text) {
+                            showDramaticText(phase.text);
+                        }
+                        
+                        // Randomly make characters more nervous
+                        if (Math.random() > 0.5) {
+                            increaseNervousness();
+                        }
+                        
+                        // Move to next phase
+                        currentPhase++;
+                        setTimeout(runPhase, phase.duration);
+                    } else {
+                        // Final phase - reveal
+                        clearInterval(numInterval);
+                        
+                        // Dramatic pause with suspense
+                        resultElement.className = "number-display";
+                        resultElement.textContent = "...";
+                        
+                        // Big flash before reveal
+                        setTimeout(() => {
+                            flashScreen(0.8);
+                            playKawaiiSound('dramatic');
+                            
+                            // Pick from available numbers (the actual final number)
+                            const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+                            const finalNumber = availableNumbers[randomIndex];
+                            
+                            // Remove the number from available numbers
+                            availableNumbers.splice(randomIndex, 1);
+                            selectedNumbers.push(finalNumber);
+                            
+                            setTimeout(() => {
+                                // Randomly decide if we should show a fake number first (50% chance)
+                                const shouldShowFakeNumber = Math.random() < 0.5;
+                                
+                                if (shouldShowFakeNumber) {
+                                    // Generate a fake number that's NOT the final number
+                                    let fakeNumber;
+                                    do {
+                                        fakeNumber = Math.floor(Math.random() * maxNumber) + 1;
+                                    } while (fakeNumber === finalNumber);
+                                    
+                                    // Show fake number with slightly different animation
+                                    resultElement.className = "number-display fake-reveal";
+                                    resultElement.textContent = fakeNumber;
+                                    playKawaiiSound('fake');
+                                    
+                                    // Show a "wait" reaction from characters
+                                    setTimeout(() => {
+                                        makeCharactersLookConfused();
+                                        showDramaticText("...");
+                                        
+                                        // Hide the fake number - SHORTER DELAY HERE
+                                        setTimeout(() => {
+                                            resultElement.className = "number-display hide-number";
+                                            
+                                            // Then show the real number - SHORTER DELAY HERE
+                                            setTimeout(() => {
+                                                // Show the real number with bounce animation
+                                                resultElement.className = "number-display reveal";
+                                                resultElement.textContent = finalNumber;
+                                                flashScreen(0.5);
+                                                playKawaiiSound('reveal');
+                                                showDramaticText("Actually...");
+                                                
+                                                // Characters react with joy
+                                                setTimeout(() => {
+                                                    makeCharactersHappy();
+                                                    createHearts();
+                                                    playKawaiiSound('success');
+                                                    
+                                                    // Happy phrases
+                                                    const happyPhrases = ["Yay!", "For real this time!", "わーい!", "Perfect!", "♡", "Super cute!"];
+                                                    const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                                                    showDramaticText(randomHappyPhrase, true);
+                                                    
+                                                    // Re-enable button
+                                                    generateBtn.disabled = false;
+                                                    isGenerating = false;
+                                                    
+                                                    // Show reset button if all numbers are used
+                                                    if (availableNumbers.length === 0) {
+                                                        generateBtn.style.display = 'none';
+                                                        resetBtn.style.display = 'block';
+                                                    }
+                                                }, 500);
+                                            }, 300);
+                                        }, 700);
+                                    }, 500);
+                                } else {
+                                    // No fake number, just show the real one directly
+                                    resultElement.className = "number-display reveal";
+                                    resultElement.textContent = finalNumber;
+                                    playKawaiiSound('reveal');
+                                    
+                                    // Characters react with joy
+                                    setTimeout(() => {
+                                        makeCharactersHappy();
+                                        createHearts();
+                                        playKawaiiSound('success');
+                                        
+                                        // Random happy phrases
+                                        const happyPhrases = ["Yay!", "Unlucky you", "わーい!", "Perfect!", "♡", "Super cute!"];
+                                        const randomHappyPhrase = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                                        showDramaticText(randomHappyPhrase, true);
+                                        
+                                        // Re-enable button
+                                        generateBtn.disabled = false;
+                                        isGenerating = false;
+                                        
+                                        // Show reset button if all numbers are used
+                                        if (availableNumbers.length === 0) {
+                                            generateBtn.style.display = 'none';
+                                            resetBtn.style.display = 'block';
+                                        }
+                                    }, 500);
+                                }
+                            }, 300);
+                        }, 600);
+                    }
+                }
+                
+                // Start the first phase
+                numInterval = setInterval(() => {
+                    resultElement.textContent = Math.floor(Math.random() * 32) + 1;
+                }, 150);
+                
+                setTimeout(runPhase, 300);
+                
+            } catch (e) {
+                console.error("Error generating number:", e);
+                // Make sure button is re-enabled in case of error
+                document.getElementById('generateBtn').disabled = false;
+                isGenerating = false;
             }
-            
-            // Start the first phase
-            let numInterval = setInterval(() => {
-                resultElement.textContent = Math.floor(Math.random() * 32) + 1;
-            }, 150);
-            
-            setTimeout(runPhase, 500);
         }
         
         function resetGenerator() {
-            // Reset available numbers
-            resetNumberTracking();
-            
-            // Play button sound
-            playKawaiiSound('button');
-            
-            // Reset the display
-            document.getElementById('result').textContent = "?";
-            document.getElementById('result').className = "number-display";
-            
-            // Show generate button, hide reset button
-            document.getElementById('generateBtn').style.display = 'inline-block';
-            document.getElementById('resetBtn').style.display = 'none';
-            
-            // Reset characters
-            resetCharacters();
-            
-            // Show a happy message
-            showDramaticText("Let's go again! ✨", true);
+            try {
+                // Reset available numbers
+                resetNumberTracking();
+                
+                // Play button sound
+                playKawaiiSound('button');
+                
+                // Reset the display
+                document.getElementById('result').textContent = "?";
+                document.getElementById('result').className = "number-display";
+                
+                // Show generate button, hide reset button
+                document.getElementById('generateBtn').style.display = 'block';
+                document.getElementById('resetBtn').style.display = 'none';
+                
+                // Reset characters
+                resetCharacters();
+                
+                // Show a happy message
+                showDramaticText("Let's go again! ✨", true);
+                
+                // Ensure we're not in generating state
+                isGenerating = false;
+                
+                // Clean up any lingering audio resources
+                cleanupAllAudioNodes();
+                
+                // Reset audio refresh counter
+                soundRefreshCounter = 0;
+                
+                // If audio context exists but is in a bad state, recreate it
+                if (audioCtx && (audioCtx.state === 'closed' || audioCtx.state === 'suspended')) {
+                    try {
+                        audioCtx.close();
+                    } catch (e) {
+                        // Ignore errors on close
+                    }
+                    audioCtx = null;
+                    initAudio();
+                }
+            } catch (e) {
+                console.error("Error resetting generator:", e);
+            }
         }
         
         function flashScreen(intensity = 0.3) {
@@ -877,9 +1514,7 @@
             dramaticText.textContent = text;
             dramaticText.style.color = isHappy ? "#ffeb3b" : "white";
             dramaticText.style.opacity = 1;
-            dramaticText.style.top = `${Math.random() * 50 + 25}%`;
-            dramaticText.style.left = `${Math.random() * 70 + 15}%`;
-            dramaticText.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            dramaticText.style.top = `${Math.random() * 40 + 30}%`;
             
             setTimeout(() => {
                 dramaticText.style.opacity = 0;
